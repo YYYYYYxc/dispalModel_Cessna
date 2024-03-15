@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <script type="module">    
+    import * as THREE from '/three.module.js';
+    import { GLTFLoader } from '/GLTFLoader.js';
+    import {OrbitControls} from '/OrbitControls.js'
+    import WebGL from '/WebGL.js'
+    let scene, camera, renderer, ambientLight;
+        //Scene
+        scene = new THREE.Scene()
+        scene.background = new THREE.Color(0x000)
+        // 创建渐变背景
+        function createGradientTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2;
+            canvas.height = 2; // 尺寸可以很小，因为我们使用的是渐变
+
+            const context = canvas.getContext('2d');
+            const gradient = context.createLinearGradient(0, 0, 0, 2); // 垂直渐变
+            gradient.addColorStop(0, 'rgb(180,180,180)');
+            gradient.addColorStop(1, 'rgb(160,160,160)');
+
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // 将渐变纹理设置为场景背景
+        const gradientTexture = createGradientTexture();
+        scene.background = gradientTexture;
+
+
+        //Renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        //Camera
+        const aspect1 = window.innerWidth / window.innerHeight;
+        camera = new THREE.PerspectiveCamera(60, aspect1, 0.01, 5000);
+        camera.rotation.y = (90 / 180) * Math.PI;
+        camera.position.set(500, 500, 500);
+        //Camera Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.addEventListener("change", renderer);
+
+        //Light
+        // ambientLight = new AmbientLight(0xaaaaaa, 25);
+        // scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff,5);
+        directionalLight.position.set(500, 500, 500); // 调整光源位置
+        scene.add(directionalLight);
+        const directionalLight1 = new THREE.DirectionalLight(0xffffff, 5);
+        directionalLight1.position.set(-500, -500, -500); // 调整光源位置
+        scene.add(directionalLight1);
+
+        //Loader
+        const loader = new GLTFLoader();
+        loader.load("./scene.gltf", (result) => {
+            scene.add(result.scene);
+            animate();
+        });
+        const animate = () => {
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+    </script>
+</body>
+
+</html>
